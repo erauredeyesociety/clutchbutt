@@ -1,67 +1,10 @@
 import requests
 import random
+from bs4 import BeautifulSoup
+from datetime import datetime, timedelta
 
-newsSites = {
-    "AP News": "https://www.bbc.com/",
-    "BBC": "apnews.com",
-    "FOX News": "www.foxnews.com",
-    "Wall Street Journal": "www.wsj.com",
-    "Barrons": "www.barrons.com",
-    "Forbes": "www.forbes.com",
-    "CNN": "www.cnn.com",
-    "CNBC": "www.cnbc.com",
-    "Yahoo": "www.yahoo.com",
-    "EPOCH Times": "www.theepochtimes.com",
-    "Reuters": "www.reuters.com",
-    https://www.nytimes.com/
-    https://www.washingtonpost.com/
-}
-
-youtubes = {
-
-}
-
-government_branches = {
-    https://www.dailypress.senate.gov/
-    https://www.periodicalpress.senate.gov/
-    https://progressives.house.gov/press-releases
-    https://www.speaker.gov/category/press-releases/
-    https://www.supremecourt.gov/publicinfo/press/pressreleases.aspx
-    https://www.whitehouse.gov/briefings-statements/
-    https://www.whitehouse.gov/news/
-    https://home.treasury.gov/news/press-releases
-    https://home.treasury.gov/news/press-releases/statements-remarks
-}
-
-military = {
-    https://www.militarytimes.com/
-    https://www.16af.af.mil/Newsroom/
-    https://www.af.mil/News/
-    https://www.army.mil/news/newsreleases
-    https://www.marines.mil/News/Press-Releases/
-    https://www.navy.mil/Press-Office/Press-Releases/
-    https://www.news.uscg.mil/Press-Releases/
-    https://www.spaceforce.mil/News/
-    https://www.defense.gov/News/Releases/
-    https://www.cybercom.mil/Media/News/
-}
-
-intelligence = {
-    https://www.nsa.gov/Press-Room/Press-Releases-Statements/
-    https://www.nsa.gov/Press-Room/Speeches-Testimony/
-    https://www.dia.mil/News-Features/
-    https://www.dia.mil/News-Features/Press-Releases/
-    https://www.cia.gov/stories/press-releases-and-statements/
-    https://www.fbi.gov/news/press-releases
-    https://www.dea.gov/what-we-do/news/press-releases
-    https://www.dea.gov/what-we-do/news/stories
-    https://www.ice.gov/newsroom
-    https://www.atf.gov/news/press-releases
-    https://www.nro.gov/news-media-featured-stories/news-media-press-releases/
-    https://www.dni.gov/index.php/348-newsroom/press-releases
-    https://www.nga.mil/news/News.html
-    https://www.state.gov/remarks-and-releases-bureau-of-intelligence-and-research
-}
+# Required packages: requests, beautifulsoup4
+# Install using: pip install requests beautifulsoup4
 
 # List of user agents to rotate
 USER_AGENTS = [
@@ -80,12 +23,43 @@ def save_html(html, filename="tmp.html"):
     with open(filename, "w", encoding="utf-8") as file:
         file.write(html)
 
+def extract_hyperlinks(filename="tmp.html", base_url="https://www.cnn.com"):
+    with open(filename, "r", encoding="utf-8") as file:
+        soup = BeautifulSoup(file, "html.parser")
+    
+    links = []
+    for a_tag in soup.find_all("a", href=True):
+        text = a_tag.get_text(strip=True)
+        href = a_tag["href"]
+        if text and len(text.split()) >= 5:  # Only store links with at least 5 words in text
+            if href.startswith("/"):
+                href = base_url + href  # Prepend base URL if link is relative
+            links.append((text, href))
+    
+    return links
+
+def save_links(links, filename="links.txt"):
+    with open(filename, "w", encoding="utf-8") as file:
+        for text, link in links:
+            file.write(f"{text}: {link}\n")
+
+def print_dates():
+    today = datetime.now().strftime("%Y-%m-%d")
+    yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+    print(f"Today's date: {today}")
+    print(f"Yesterday's date: {yesterday}")
+
 def main():
-    url = "https://www.foxnews.com/"
+    print_dates()
+    url = "https://www.cnn.com"
     print(f"Fetching page: {url}")
     html = fetch_page(url)
     save_html(html)
     print("HTML saved to tmp.html")
+    
+    links = extract_hyperlinks()
+    save_links(links)
+    print("Extracted hyperlinks saved to links.txt")
     
 if __name__ == "__main__":
     main()

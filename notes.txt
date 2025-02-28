@@ -1,0 +1,186 @@
+Make text dropdown in markdown
+```
+<details>
+<summary>How do I dropdown?</summary>
+<br>
+This is how you dropdown.
+</details>
+
+
+<details open>
+<summary>I automatically open</summary>
+<br>
+Waaa, you see me. I thought I would be hidden ;p .
+</details>
+```
+
+use a dropdown for getting articles that have titles that are smaller than expected length that begin with original url
+
+making unique current links
+instead of parsing for dates, simply compare list of links to previous day's links, if links already exist, remove from list to get current links
+
+keeping unique links - if links are different every day, what if someone doesn't post for a month? their latest article will appear every other day on the markdown headlines document.
+
+newsSites = {
+    "AP News": "apnews.com",
+    "BBC": "https://www.bbc.com/",
+    "FOX News": "www.foxnews.com",
+    "Wall Street Journal": "www.wsj.com",
+    "Barrons": "www.barrons.com",
+    "Forbes": "www.forbes.com",
+    "CNN": "www.cnn.com",
+    "CNBC": "www.cnbc.com",
+    "Yahoo": "www.yahoo.com",
+    "EPOCH Times": "www.theepochtimes.com",
+    "Reuters": "www.reuters.com",
+    https://www.nytimes.com/
+    https://www.washingtonpost.com/
+    https://www.bloomberg.com/
+    https://www.foxbusiness.com/
+    https://finance.yahoo.com/
+}
+
+foreign_news = {
+    https://news.un.org/en/news
+    https://apnews.com/hub/foreign-policy
+    https://apnews.com/hub/international-relations
+    https://abcnews.go.com/International
+    https://foreignpolicy.com/
+    https://www.washingtonpost.com/foreign-policy/
+    https://www.nytimes.com/topic/subject/international-relations
+    https://www.bbc.com/news/us-canada
+    https://www.reuters.com/world/
+    https://www.bbc.com/news/world
+    https://www.euronews.com/
+    https://www.africanews.com/
+
+    https://www.scmp.com/topics/brics
+}
+
+youtube_events = {
+    https://www.youtube.com/@S2Underground/videos
+    https://www.youtube.com/@TheEpochTimesNews/videos
+    https://www.youtube.com/@PhilipDeFranco/videos
+    https://www.youtube.com/@Taskandpurpose/videos
+    https://www.youtube.com/@TLDRdaily/videos
+    https://www.youtube.com/@TheKatieHalperShow/videos
+}
+
+youtube_science = {
+    https://www.youtube.com/@stanford/videos
+}
+
+government_branches = {
+    https://www.dailypress.senate.gov/
+    https://www.periodicalpress.senate.gov/
+    https://www.senate.gov/legislative/LIS/floor_activity/floor_activity.htm
+    https://progressives.house.gov/press-releases
+    https://www.speaker.gov/category/press-releases/
+    https://www.govtrack.us/congress/bills/#docket
+    https://www.govtrack.us/congress/bills/#bystatus
+    https://www.supremecourt.gov/publicinfo/press/pressreleases.aspx
+    https://www.supremecourt.gov/opinions/slipopinion/24
+    https://www.supremecourt.gov/opinions/relatingtoorders/24
+    https://www.supremecourt.gov/opinions/in-chambers.aspx
+    https://www.whitehouse.gov/briefings-statements/
+    https://www.whitehouse.gov/news/
+    https://www.usda.gov/about-usda/news/press-releases
+    https://www.commerce.gov/news
+    https://www.defense.gov/news/
+    https://www.ed.gov/about/news
+    https://www.energy.gov/search?page=0&sort_by=date
+    https://www.ferc.gov/news-events/news/news-releases-headlines
+    https://www.hhs.gov/about/news/index.html
+    https://www.hhs.gov/ocr/newsroom/index.html
+    https://www.dhs.gov/all-news-updates
+    https://www.hud.gov/press
+    https://www.hudoig.gov/news-congressional/press-releases
+    https://www.doi.gov/news
+    https://www.doi.gov/wildlandfire/press-releases
+    https://www.justice.gov/news
+    https://www.dol.gov/newsroom/releases
+    https://www.bls.gov/bls/newsrels.htm
+    https://www.state.gov/press-releases/
+    https://www.transportation.gov/newsroom/press-releases
+    https://home.treasury.gov/news/press-releases
+    https://home.treasury.gov/news/press-releases/statements-remarks
+    https://veterans.house.gov/news/
+    https://www.vaoig.gov/reports/all
+}
+
+military = {
+    https://www.16af.af.mil/Newsroom/
+    https://www.af.mil/News/
+    https://www.army.mil/news/newsreleases
+    https://www.arcyber.army.mil/Cyber-Highlights/
+    https://www.marines.mil/News/Press-Releases/
+    https://www.marforcyber.marines.mil/News/
+    https://www.navy.mil/Press-Office/Press-Releases/
+    https://www.news.uscg.mil/Press-Releases/
+    https://www.spaceforce.mil/News/
+    https://www.cybercom.mil/Media/News/
+}
+
+gov_intelligence = {
+    https://www.nsa.gov/Press-Room/Press-Releases-Statements/
+    https://www.nsa.gov/Press-Room/Speeches-Testimony/
+    https://www.dia.mil/News-Features/
+    https://www.dia.mil/News-Features/Press-Releases/
+    https://www.cia.gov/stories/press-releases-and-statements/
+    https://www.fbi.gov/news/press-releases
+    https://www.dea.gov/what-we-do/news/press-releases
+    https://www.dea.gov/what-we-do/news/stories
+    https://www.ice.gov/newsroom
+    https://www.atf.gov/news/press-releases
+    https://www.nro.gov/news-media-featured-stories/news-media-press-releases/
+    https://www.dni.gov/index.php/348-newsroom/press-releases
+    https://www.nga.mil/news/News.html
+    https://www.state.gov/remarks-and-releases-bureau-of-intelligence-and-research
+    https://www.bls.gov/opub/ted/
+}
+
+countries_of_particular_concern = {
+    https://www.state.gov/countries-of-particular-concern-special-watch-list-countries-entities-of-particular-concern/
+
+    Burma, People’s Republic of China, Cuba, Eritrea, Iran, the Democratic People’s Republic of Korea, Nicaragua, Pakistan, Russia, Saudi Arabia, Tajikistan, and Turkmenistan.
+
+    special watchlist
+
+    Algeria, Azerbaijan, the Central African Republic, Comoros, and Vietnam.
+}
+
+government_misc = {
+    https://breakingdefense.com/tag/army-cyber-command/
+    https://www.militarytimes.com/
+    https://www.dvidshub.net/search?filter[type]=news
+    https://www.nasa.gov/news/all-news/
+}
+
+cyber = {
+    https://www.microsoft.com/en-us/security/blog/topic/threat-intelligence/
+    https://krebsonsecurity.com/
+    https://shop.hak5.org/pages/threatwire
+    https://industrialcyber.co/
+    https://cybersecuritynews.com/
+    https://www.malwarebytes.com/blog/category/news
+    https://www.varonis.com/blog
+    https://www.proofpoint.com/us/blog
+    https://www.darkreading.com/latest-news
+    https://www.pentestpartners.com/security-blog/
+    https://www.theregister.com/
+    https://www.theregister.com/security/
+    https://securityaffairs.com/
+    https://securityboulevard.com/
+    https://securityboulevard.com/category/blogs/news/
+    https://www.bleepingcomputer.com/tag/cybersecurity/
+    https://thehackernews.com/
+    https://threatpost.com/
+    https://www.securityweek.com/
+    https://www.csoonline.com/in/blogs/
+    https://www.tripwire.com/state-of-security
+    https://www.troyhunt.com/
+    https://www.lastwatchdog.com/
+    https://www.schneier.com/
+    https://news.sophos.com/en-us/
+    https://www.afcea.org/signal-media
+}
