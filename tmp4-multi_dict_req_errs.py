@@ -4,26 +4,49 @@ import json
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import os
+from links_dicts import link_dictionaries  # Importing link dictionaries from links_dict.py
 
-# List of user agents to rotate
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36",
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Edge/91.0.864.59 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.122 Safari/537.36"
 ]
 
-# Example structure of links dictionary (already defined)
-links = {
-    "CNN": "https://www.cnn.com",
-    "BBC": "https://www.bbc.com",
-    "NYTimes": "https://www.nytimes.com"
-}
 
 def fetch_page(url):
-    headers = {"User-Agent": random.choice(USER_AGENTS)}
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()  # Raise an error for bad responses (4xx, 5xx)
-    return response.text
+    # Pick a random header from the list
+    user_agent = random.choice(USER_AGENTS)
+    
+    try:
+        # Send the request with randomly chosen headers to simulate a real browser
+        response = requests.get(url, headers={'User-Agent': user_agent}, timeout=10)
+        response.raise_for_status()  # Raise an error for bad responses (4xx, 5xx)
+        
+        # Check if the response has any content
+        if not response.text.strip():  # strip() removes any leading/trailing whitespace
+            print(f"No content found on {url} (skipping...)")
+            return None
+        
+        return response.text  # Return the HTML content if it has content
+
+    except requests.exceptions.Timeout:
+        print(f"Timeout: The request to {url} took too long (skipping...)")
+    except requests.exceptions.HTTPError as e:
+        if response.status_code == 401:
+            print(f"401 Client Error: Forbidden for URL: {url} (skipping...)")
+        else:
+            print(f"HTTP Error {response.status_code} for URL: {url}")  # Print the actual HTTP error code
+    except requests.exceptions.RequestException as e:
+        # Catch any other requests-related exceptions
+        print(f"Request Exception for URL {url}: {str(e)} (skipping...)")
+    except Exception as e:
+        # Catch all other errors to avoid script crashing
+        print(f"An unexpected error occurred for URL {url}: {str(e)} (skipping...)")
+    
+    return None  # Return None if there's an error or timeout
 
 def save_html(html, website):
     # Ensure the tmp_html directory exists
@@ -38,7 +61,7 @@ def clean_text(text):
     # This function can be customized to clean text if necessary
     return text.strip()
 
-def extract_hyperlinks(filename, base_url):
+def extract_hyperlinks(filename, base_url, links):
     with open(filename, "r", encoding="utf-8") as file:
         soup = BeautifulSoup(file, "html.parser")
     
@@ -67,7 +90,7 @@ def extract_hyperlinks(filename, base_url):
     
     return links_data
 
-def load_existing_links(filename="links.json"):
+def load_existing_links(filename):
     if os.path.exists(filename):
         with open(filename, "r", encoding="utf-8") as file:
             return json.load(file)
@@ -85,8 +108,9 @@ def update_history_links(existing_links, current_date):
 
     return history_links
 
-def save_links(links_data, filename="links.json"):
+def save_links(links_data, category_name):
     # Load existing data to append to it
+    filename = f'tmp_json/links_{category_name}.json'
     existing_links = load_existing_links(filename)
     
     # Append new daily links to existing daily links
@@ -112,21 +136,37 @@ def save_links(links_data, filename="links.json"):
     with open(filename, "w", encoding="utf-8") as file:
         json.dump(existing_links, file, indent=4)
 
+skipped_sources = []
+
 def main():
-    # Loop through the links dictionary
-    for website, base_url in links.items():
-        print(f"Fetching page: {base_url}")
+    os.makedirs('tmp_json', exist_ok=True)
+    # Loop through the link dictionaries imported from links_dict.py
+    for category_name, links in link_dictionaries.items():
+        print(f"Processing links for category: {category_name}")
         
-        # Fetch HTML content for each website
-        html = fetch_page(base_url)
-        save_html(html, website)  # Save HTML as <website>_tmp.html inside tmp_html/
-        
-        # Extract hyperlinks from the saved HTML file
-        links_data = extract_hyperlinks(f"tmp_html/{website}_tmp.html", base_url)
-        
-        # Save the extracted links to a JSON file
-        save_links(links_data)
-        print(f"Extracted hyperlinks for {website} saved to links.json")
+        for website, base_url in links.items():
+            print(f"Fetching page: {base_url}")
+            
+            # Fetch HTML content for each website
+            html = fetch_page(base_url)
+            if html == None:
+                skipped_sources.append(base_url)
+                continue
+            save_html(html, website)  # Save HTML as <website>_tmp.html inside tmp_html/
+            
+            # Extract hyperlinks from the saved HTML file
+            links_data = extract_hyperlinks(f"tmp_html/{website}_tmp.html", base_url, links)
+            
+            # Save the extracted links to a JSON file
+            save_links(links_data, category_name)
+            print(f"Extracted hyperlinks for {website} saved to links_{category_name}.json")
+    
+    # Print skipped news sources at the end
+    print(f"\nTotal skipped news sources: {len(skipped_sources)}")
+    if skipped_sources:
+        print("Skipped news sources:")
+        for source in skipped_sources:
+            print(source)
         
 if __name__ == "__main__":
     main()

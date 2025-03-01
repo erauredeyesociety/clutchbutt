@@ -27,7 +27,9 @@ data analytics - make a dropdown in markdown with analytics of the headlines - m
 
 waiting for content on website to fully load (separate task from link collection)
 
-use splashJS
+use splashJS - would need to run a docker container to make requests from the python sript to whe splash api 
+
+https://docs.github.com/en/actions/sharing-automations/creating-actions/creating-a-docker-container-action
 
 ```
 docker pull scrapinghub/splash
@@ -49,3 +51,6 @@ url_to_render = "https://example.com"
 rendered_html = render_with_splash(url_to_render)
 print(rendered_html)
 ```
+
+
+also need to handle 401 and 403 errors - selenium?

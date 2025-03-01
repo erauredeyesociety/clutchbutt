@@ -1,6 +1,7 @@
-links.json
-links_history.json
+**links**.json
 tmp_**.html
 **_tmp.html
 tmp_html/
+tmp_json/
 venv/
+**pycache**
