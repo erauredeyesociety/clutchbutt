@@ -4,6 +4,12 @@ get html content
 
 get link elements from html content and their corresponding text title/label and store in link list as (headline: link)
 
+check link validaty so that it is directing to the same website or a subdirectory "/" of the website
+
+if the link has a different domain, a broken link "//", or two domains "https://apnews.com//www.foxnews.com/games/5-across-word-game", remove it
+
+check link validity based on the response code from every link (get lots of 429 errors because of too many requests, maybe need async or delay?) 
+
 for every link
 if link starts with a "/", then prepend the original url to the link 
 
