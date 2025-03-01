@@ -1,7 +1,11 @@
 import requests
 import random
+import json
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
+import unicodedata
+import re
+import os
 
 # Required packages: requests, beautifulsoup4
 # Install using: pip install requests beautifulsoup4
@@ -19,9 +23,14 @@ def fetch_page(url):
     response.raise_for_status()  # Raise an error for bad responses (4xx, 5xx)
     return response.text
 
-def save_html(html, filename="tmp.html"):
+def save_html(html, filename):
     with open(filename, "w", encoding="utf-8") as file:
         file.write(html)
+
+def clean_text(text):
+    # Normalize all Unicode characters
+    text = unicodedata.normalize("NFKD", text)
+    return text
 
 def extract_hyperlinks(filename="tmp.html", base_url="https://www.cnn.com"):
     with open(filename, "r", encoding="utf-8") as file:
@@ -29,28 +38,49 @@ def extract_hyperlinks(filename="tmp.html", base_url="https://www.cnn.com"):
     
     links = []
     for a_tag in soup.find_all("a", href=True):
-        text = a_tag.get_text(strip=True)
+        text = clean_text(a_tag.get_text(strip=True))
         href = a_tag["href"]
         if text and len(text.split()) >= 5:  # Only store links with at least 5 words in text
             if href.startswith("/"):
                 href = base_url + href  # Prepend base URL if link is relative
-            links.append((text, href))
+            links.append({"date": datetime.now().strftime("%Y-%m-%d"), "headline": text, "link": href})
     
     return links
 
-def save_links(links, filename="links.txt"):
-    with open(filename, "w", encoding="utf-8") as file:
-        for text, link in links:
-            file.write(f"{text}: {link}\n")
+def load_history(filename="links_history.json"):
+    if os.path.exists(filename):
+        with open(filename, "r", encoding="utf-8") as file:
+            try:
+                data = json.load(file)
+                if "daily_links" not in data or "history_links" not in data:
+                    data = {"daily_links": [], "history_links": []}
+            except json.JSONDecodeError:
+                data = {"daily_links": [], "history_links": []}
+    else:
+        data = {"daily_links": [], "history_links": []}
+    return data
 
-def print_dates():
+def save_history(data, filename="links_history.json"):
+    with open(filename, "w", encoding="utf-8") as file:
+        json.dump(data, file, indent=4)
+
+def manage_history():
+    data = load_history()
     today = datetime.now().strftime("%Y-%m-%d")
-    yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
-    print(f"Today's date: {today}")
-    print(f"Yesterday's date: {yesterday}")
+    
+    # Move old daily links to history if they are not from today
+    if data["daily_links"] and data["daily_links"][0]["date"] != today:
+        data["history_links"] = data["daily_links"] + data["history_links"]
+        data["daily_links"] = []
+    
+    # Keep only links from the last 4 weeks in history
+    four_weeks_ago = datetime.now() - timedelta(days=28)
+    data["history_links"] = [link for link in data["history_links"] if datetime.strptime(link["date"], "%Y-%m-%d") >= four_weeks_ago]
+    
+    return data
+
 
 def main():
-    print_dates()
     url = "https://www.cnn.com"
     print(f"Fetching page: {url}")
     html = fetch_page(url)
@@ -58,8 +88,10 @@ def main():
     print("HTML saved to tmp.html")
     
     links = extract_hyperlinks()
-    save_links(links)
-    print("Extracted hyperlinks saved to links.txt")
+    data = manage_history()
+    data["daily_links"].extend(links)
+    save_history(data)
+    print("Updated links saved to links_history.json")
     
 if __name__ == "__main__":
     main()

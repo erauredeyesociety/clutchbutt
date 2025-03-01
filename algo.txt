@@ -1,0 +1,36 @@
+request url
+
+get html content
+
+get link elements from html content and their corresponding text title/label and store in link list as (headline: link)
+
+for every link
+if link starts with a "/", then prepend the original url to the link 
+
+for every headline
+if headline has less than 5 words, remove from link list
+
+check for a local file named links_history.json
+if file does not exist, create it with two sections named "daily_links" and "history_links"
+if file exists, check for formatting - that only sections "daily_links" and "history_links" exist 
+if "daily_links" has objects in it, move those objects to the beginning or top of history_links
+
+now I want to keep track of what website the links are coming from, in a subsection of daily_links and history_links, make sure to include the website name
+
+based on clock 
+due to html content being updated throughout the day, the url is requested every 12 hours to get new links
+
+for the first request, compare links against link history so as not to have the same links as the day before
+    if "history_links" is empty, skip comparison of links
+    store "today's links" in links_history.json under "daily_links"
+for the second request, compare links against link history so as not to have the same links as the day before
+    if "history_links" is empty, skip comparison of links
+    compare links against "daily_links" so as not to have repeat articles in daily links
+    append "today's links" in links_history.json under "daily_links"
+
+
+the python script will run on a corn job every 12 hrs. I want to have the current day's links separate from a history of links, then the next time it runs on the same day, keep those links with the current day's links.
+then when the script runs again, if the times of the links do not match the day, move the non matching links to the links history section of the json file.
+
+store healines and links in json format as a history of links in links_history.json under "history_links"
+store links from up to 2 weeks old, then delete them.
