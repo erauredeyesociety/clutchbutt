@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import os
 from links_dicts import link_dictionaries  # Importing link dictionaries from links_dict.py
+from gen_md import generate_markdown_from_json
 
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
@@ -74,6 +75,8 @@ def extract_hyperlinks(filename, base_url, links):
         for name, base_url in links.items():
             if href.startswith(base_url) or href.startswith("/"):  # Check if the link starts with the base URL
                 if href.startswith("/"):  # Handle relative URLs by prepending base URL
+                    if base_url.endswith("/"):
+                        base_url = base_url.rstrip("/")
                     href = base_url + href
                 
                 # Only store links with at least 5 words in text
@@ -167,6 +170,12 @@ def main():
         print("Skipped news sources:")
         for source in skipped_sources:
             print(source)
+
+    print("\n\nGenerating markdown files...")
+    json_directory = 'tmp_json'
+    output_directory = 'content/posts'
+    generate_markdown_from_json(json_directory, output_directory)
+    print("Markdown files generated successfully!")
         
 if __name__ == "__main__":
     main()

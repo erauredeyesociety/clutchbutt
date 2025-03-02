@@ -40,10 +40,7 @@ video_events = {
     "Philip DeFranco": "https://www.youtube.com/@PhilipDeFranco/videos",
     "Task and Purpose": "https://www.youtube.com/@Taskandpurpose/videos",
     "TLDR Daily": "https://www.youtube.com/@TLDRdaily/videos",
-    "The Katie Halper Show": "https://www.youtube.com/@TheKatieHalperShow/videos"
-}
-
-video_technology = {
+    "The Katie Halper Show": "https://www.youtube.com/@TheKatieHalperShow/videos",
     "Stanford": "https://www.youtube.com/@stanford/videos"
 }
 
@@ -154,13 +151,12 @@ cyber = {
 
 
 link_dictionaries = {
-    "Current Events": news_sites,
-    "Foreign News": foreign_news,
-    "Video Events": video_events,
-    "Video Technology": video_technology,
-    "US Gov Branches": government_branches,
+    "General": news_sites,
+    "Foreign": foreign_news,
+    "Videos": video_events,
+    "US Government": government_branches,
     "US Military": us_military,
     "US Intelligence": us_intelligence,
-    "US Gov Misc": government_misc,
+    "Misc US Gov": government_misc,
     "Cyber": cyber,
 }
